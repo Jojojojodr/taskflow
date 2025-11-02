@@ -31,13 +31,13 @@ tasks:
     dir: api
     cmds:
       - go mod tidy
-      - go build -o bin/app ./cmd/main.go
+      - go build -o {{ .EXE_PATH }} ./cmd/main.go
 
   api:run:
     desc: "Run the Go API locally"
     dir: api
     cmds:
-      - ./bin/app
+      - ./{{ .EXE_PATH }}
     
   api:serve:
     desc: "Run the Go API in live development mode"
