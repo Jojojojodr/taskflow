@@ -1,0 +1,140 @@
+version: "3"
+
+includes:
+  os_specific: ./tasks/taskfile_{{ OS }}.yaml
+
+tasks:
+  default:
+    desc: "Show available tasks"
+    cmds:
+      - echo "Available tasks:"
+      - echo "  dev          - Start both frontend and backend in development mode"
+      - echo "  api:build    - Build the Go API"
+      - echo "  api:run      - Run the Go API locally"
+      - echo "  api:test     - Run Go API tests"
+      - echo "  frontend:dev - Start frontend development server"
+      - echo "  frontend:build - Build frontend for production"
+      - echo "  frontend:preview - Preview built frontend"
+      - echo "  docker:build - Build Docker images"
+      - echo "  docker:up    - Start services with Docker Compose"
+      - echo "  docker:down  - Stop Docker services"
+      - echo "  clean        - Clean build artifacts"
+
+  # Development tasks
+  dev:
+    desc: "Start both frontend and backend in development mode"
+    deps: [api:serve, frontend:dev, frontend:watch-css]
+
+  # API tasks
+  api:build:
+    desc: "Build the Go API"
+    dir: api
+    cmds:
+      - go mod tidy
+      - go build -o bin/app ./cmd/main.go
+
+  api:run:
+    desc: "Run the Go API locally"
+    dir: api
+    cmds:
+      - ./bin/app
+    
+  api:serve:
+    desc: "Run the Go API in live development mode"
+    dir: api
+    cmds:
+      - air -c .air_{{ OS }}.toml
+
+  api:test:
+    desc: "Run Go API tests"
+    dir: api
+    cmds:
+      - go test ./...
+
+  api:mod:
+    desc: "Download Go modules"
+    dir: api
+    cmds:
+      - go mod download
+      - go mod tidy
+
+  # Frontend tasks
+  frontend:install:
+    desc: "Install frontend dependencies"
+    dir: frontend
+    cmds:
+      - npm install
+
+  frontend:dev:
+    desc: "Start frontend development server"
+    dir: frontend
+    deps: [frontend:install]
+    cmds:
+      - npm run dev
+
+  frontend:build:
+    desc: "Build frontend for production"
+    dir: frontend
+    deps: [frontend:install]
+    cmds:
+      - npm run build
+
+  frontend:preview:
+    desc: "Preview built frontend"
+    dir: frontend
+    deps: [frontend:build]
+    cmds:
+      - npm run preview
+
+  frontend:watch-css:
+    desc: "Watch CSS changes with Tailwind"
+    dir: frontend
+    cmds:
+      - echo "Watching CSS changes"
+      - ./{{ .TAILWIND }} -i ./src/assets/main.css -o ./src/assets/style.css --watch
+    silent: true
+
+  frontend:build-css:
+    desc: "Build CSS with Tailwind"
+    dir: frontend
+    cmds:
+      - echo "Building CSS"
+      - ./{{ .TAILWIND }} -i ./static/css/input.css -o ./static/css/style.css --minify
+    silent: true
+
+  # Docker tasks
+  docker:build:
+    desc: "Build Docker images"
+    cmds:
+      - docker-compose build
+
+  docker:up:
+    desc: "Start services with Docker Compose"
+    cmds:
+      - docker-compose up -d
+
+  docker:down:
+    desc: "Stop Docker services"
+    cmds:
+      - docker-compose down
+
+  docker:logs:
+    desc: "Show Docker logs"
+    cmds:
+      - docker-compose logs -f
+
+  # Utility tasks
+  clean:
+    desc: "Clean build artifacts"
+    cmds:
+      - rm -rf api/bin/
+      - rm -rf frontend/dist/
+      - rm -rf frontend/node_modules/
+
+  build:
+    desc: "Build both API and frontend"
+    deps: [api:build, frontend:build, frontend:build-css]
+      
+  run:
+    desc: "Run both API and frontend"
+    deps: [api:run, frontend:preview]
