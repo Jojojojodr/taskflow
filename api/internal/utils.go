@@ -21,13 +21,8 @@ func HashPassword(key string) string {
 	return string(hashedKey)
 }
 
-func CheckPasswordHash(password, hash string) bool {
-	hashPassword := HashPassword(password)
-	log.Printf("%s", string(hashPassword))
+func CheckPasswordHash(password, hash string) bool {	
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	if err != nil {
-		log.Printf("Password hash comparison failed: %v\n", err)
-	}
 	return err == nil
 }
 

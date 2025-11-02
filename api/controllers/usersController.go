@@ -44,9 +44,13 @@ func GetUser(c *gin.Context) {
 }
 
 func CreateUser(c *gin.Context) {
-	var user models.User
+	var newUser struct {
+		Name     string `json:"name"`
+		Email	string `json:"email"`
+		Password string `json:"password"`
+	}
 
-	if err := c.ShouldBindJSON(&user); err != nil {
+	if err := c.ShouldBindJSON(&newUser); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error":   "Invalid JSON data",
 			"details": err.Error(),
@@ -56,7 +60,7 @@ func CreateUser(c *gin.Context) {
 
 	// Check if a user with the same name already exists
 	var existing models.User
-	check := database.DB.First(&existing, "name = ?", user.Name)
+	check := database.DB.First(&existing, "name = ?", newUser.Name)
 	if check.Error == nil {
 		c.JSON(http.StatusConflict, gin.H{
 			"error": "User with that name already exists",
@@ -69,10 +73,12 @@ func CreateUser(c *gin.Context) {
 		})
 		return
 	}
-
-	user.ID = uuid.New()
-	hashedPassword := internal.HashPassword(user.Password)
-	user.Password = hashedPassword
+	
+	var user models.User
+	user.ID = uuid.New() 
+	user.Name = newUser.Name
+	user.Email = newUser.Email
+	user.Password = internal.HashPassword(newUser.Password)
 
 	result := database.DB.Create(&user)
 	if result.Error != nil {
