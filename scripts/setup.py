@@ -2,9 +2,11 @@ import os
 import platform
 import tailwind
 import go
+import env
 
 def main():
     go.install_dependencies()
+    env.copy_env()
     
     sys = platform.system()
     if sys == "Windows":

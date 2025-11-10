@@ -44,3 +44,16 @@ def get_tailwind_binary_url():
     print(f"Detected {system} {machine}, using URL: {url}")
     
     return system, url
+
+def copy_env_file(src: str, dest: str):
+    try:
+        with open(src, 'r') as src_file:
+            content = src_file.read()
+        
+        with open(dest, 'w') as dest_file:
+            dest_file.write(content)
+        
+        print(f"Copied .env file from {src} to {dest}.")
+    except Exception as e:
+        print(f"Failed to copy .env file: {e}")
+        raise
