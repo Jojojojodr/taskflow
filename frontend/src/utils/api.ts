@@ -35,13 +35,10 @@ export interface AuthResponse {
     user: User
 }
 
-// Get API configuration from environment variables
-// Note: Vite requires VITE_ prefix for client-side env vars
 const API_SERVER = import.meta.env.VITE_API_SERVER || import.meta.env.API_SERVER
 const API_PORT = import.meta.env.VITE_API_PORT || import.meta.env.API_PORT
 
-// API base URL - using proxy in development, full URL in production
-const API_BASE_URL = import.meta.env.DEV ? '' : `http://${API_SERVER}:${API_PORT}`
+const API_BASE_URL = ''
 
 console.log('API Configuration:', {
     DEV: import.meta.env.DEV,
